@@ -17,6 +17,7 @@ def loadImages():
 def main():
     p.init()
     screen = p.display.set_mode((WIDTH, HEIGHT))
+    p.display.set_caption('Chess')
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     gs = chessengine.GameState()
@@ -47,7 +48,7 @@ def main():
                         playerClicks.append(sqSelected)
                     if len(playerClicks) == 2:
                         move = chessengine.Move(playerClicks[0], playerClicks[1], gs.board)
-                        print(move.getChessNotation())
+                        # print(move.getChessNotation())
                         if move in validMoves:
                             gs.makeMove(move)
                             moveMade = True
@@ -84,8 +85,10 @@ def main():
             gameOver = True
             if gs.whiteToMove:
                 drawText(screen, 'Black wins by Checkmate')
+                print("Black wins")
             else:
                 drawText(screen, 'White wins by Checkmate')
+                print("White wins")
         elif gs.staleMate:
             gameOver = True
             drawText(screen, 'Stalemate')
@@ -94,7 +97,9 @@ def main():
         p.display.flip()
 
 
+# Highlight square selected and moves for the piece
 def highlightSquares(screen, gs, validMoves, sqSelected):
+    # print(gs.checkMate)
     if sqSelected != ():
         r, c = sqSelected
         if gs.board[r][c][0] == (
@@ -162,11 +167,11 @@ def animateMove(move, screen, board, clock):
 
 def drawText(screen, text):
     font = p.font.SysFont("Helvetica", 32, True, False)
-    textObject = font.render(text, False, p.Color('Gray'))
+    textObject = font.render(text, 0, p.Color('Gray'))
     textLocation = p.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH / 2 - textObject.get_height() / 2,
                                                     HEIGHT / 2 - textObject.get_height() / 2)
     screen.blit(textObject, textLocation)
-    textObject = font.render(text, False, p.Color('Black'))  # shadow effect
+    textObject = font.render(text, 0, p.Color('Black'))  # shadow effect
     screen.blit(textObject, textLocation.move(2, 2))
 
 

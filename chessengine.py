@@ -1,5 +1,10 @@
 class GameState:
     def __init__(self):
+        # board is 8x8 2D List, each element of the list has 2 characters
+        # initial character == colour (b,w)
+        # second character == piece
+        # R == rook, N == knight, B == bishop, Q == Queen, K == king, P == pawn
+        # -- == empty space
         self.board = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
@@ -19,6 +24,7 @@ class GameState:
         self.checkMate = False
         self.staleMate = False
 
+    #Funtion to make a move
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
@@ -30,9 +36,12 @@ class GameState:
         if move.pieceMoved == 'bK':
             self.blackKingLocation = (move.endRow, move.endCol)
 
+    # Function to undo a move
     def undoMove(self):
         if len(self.moveLog) != 0:
+            # Removing move from log
             move = self.moveLog.pop()
+
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
@@ -63,11 +72,15 @@ class GameState:
 
     def inCheck(self):
         if self.whiteToMove:
+            # returns a bool and checks if the white king is under attack
             return self.squareUnderAttack(self.whiteKingLocation[0], self.whiteKingLocation[1])
         else:
+            # then checks black king
             return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])
 
+    # Determining if the enemy can attack the location (r, c)
     def squareUnderAttack(self, r, c):
+        # Switch turns
         self.whiteToMove = not self.whiteToMove
         oppMoves = self.getAllPossibleMoves()
         self.whiteToMove = not self.whiteToMove
@@ -89,13 +102,18 @@ class GameState:
 
     def getPawnMoves(self, r, c, moves):
         if self.whiteToMove:  # white pawn moves
+            # checking if square above is empty
             if self.board[r - 1][c] == "--":
+                # if it is we append that as a valid move
                 moves.append(Move((r, c), (r - 1, c), self.board))
                 if r == 6 and self.board[r - 2][c] == "--":
+                    # checks if the piece hasn't been moved so it can do a double move
                     moves.append(Move((r, c), (r - 2, c), self.board))
+            # captures to the left
             if c - 1 >= 0:
                 if self.board[r - 1][c - 1][0] == 'b':
                     moves.append(Move((r, c), (r - 1, c - 1), self.board))
+            # captures to the right
             if c + 1 <= 7:
                 if self.board[r - 1][c + 1][0] == 'b':
                     moves.append(Move((r, c), (r - 1, c + 1), self.board))
@@ -119,13 +137,14 @@ class GameState:
                 endRow = r + d[0] * i
                 endCol = c + d[1] * i
                 if 0 <= endRow < 8 and 0 <= endCol < 8:
+                    # checks if it can move to that end square by checking if it is empty
                     endPiece = self.board[endRow][endCol]
                     if endPiece == "--":  # empty piece is valid
                         moves.append(Move((r, c), (endRow, endCol), self.board))
                     elif endPiece[0] == enemyColor:
                         moves.append(Move((r, c), (endRow, endCol), self.board))
                         break
-                    else:   # friendly piece invalid
+                    else:  # friendly piece invalid
                         break
                 else:  # off the board
                     break
@@ -161,6 +180,7 @@ class GameState:
                     break
 
     def getQueenMoves(self, r, c, moves):
+        # can move in all directions so we use the rook and bishop valid move checks
         self.getRookMoves(r, c, moves)
         self.getBishopMoves(r, c, moves)
 
@@ -192,8 +212,9 @@ class Move:
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
-        print(self.moveID)
+        # print(self.moveID)
 
+    # move class Object Equality
     def __eq__(self, other):
         if isinstance(other, Move):
             return self.moveID == other.moveID
